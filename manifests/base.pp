@@ -8,14 +8,10 @@
 #
 class buildbot::base {
   include apt
+  include buildbot::install::deps
   include buildbot::params
-  
-  package { 'buildbot' :
-    ensure => present,
-    name   => $buildbot::params::package_deps,
-  }
 
-  $pip_defaults = { 'provider' => 'pip', 'require' => Package['buildbot'] }
+  $pip_defaults = { 'provider' => 'pip', 'require' => Class["buildbot::install::deps"] }
   create_resources(package, $buildbot::params::pip_packages,
       $pip_defaults )
 
