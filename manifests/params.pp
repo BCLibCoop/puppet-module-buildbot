@@ -10,10 +10,9 @@ class buildbot::params {
 
   case $::operatingsystem {
     Debian: {
-      $package_deps = [ 'adduser', 'build-essential', 'cvs', 'debhelper',
+      $package_deps = [ 'build-essential', 'cvs', 'debhelper',
                         'dpkg', 'git-core', 'python', 'python-central',
-                        'python-dateutil', 'python-jinja2',
-                        'python-simplejson', 'python-pip',
+                        'python-pip',
                         'python-pysqlite2', 'python-twisted',
                         'python-twisted-core', 'python-twisted-mail',
                         'python-twisted-web', 'python-twisted-words',
@@ -27,10 +26,9 @@ class buildbot::params {
       }
     }
     Ubuntu: {
-      $package_deps = [ 'adduser', 'build-essential', 'cvs', 'debhelper',
+      $package_deps = [ 'build-essential', 'cvs', 'debhelper',
                         'dpkg', 'git-core', 'python', 'python-central',
-                        'python-dateutil', 'python-jinja2',
-                        'python-simplejson', 'python-pip',
+                        'python-pip',
                         'python-pysqlite2', 'python-twisted',
                         'python-twisted-core', 'python-twisted-mail',
                         'python-twisted-web', 'python-twisted-words',
