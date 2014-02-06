@@ -11,7 +11,7 @@ class buildbot::params {
   case $::operatingsystem {
     Debian: {
       $package_deps = [ 'build-essential', 'cvs', 'debhelper',
-                        'dpkg', 'git-core', 'python', 'python-central',
+                        'dpkg', 'git-core', 'python-central',
                         'python-pip',
                         'python-pysqlite2', 'python-twisted',
                         'python-twisted-core', 'python-twisted-mail',
@@ -27,7 +27,7 @@ class buildbot::params {
     }
     Ubuntu: {
       $package_deps = [ 'build-essential', 'cvs', 'debhelper',
-                        'dpkg', 'git-core', 'python', 'python-central',
+                        'dpkg', 'git-core', 'python-central',
                         'python-pip',
                         'python-pysqlite2', 'python-twisted',
                         'python-twisted-core', 'python-twisted-mail',
