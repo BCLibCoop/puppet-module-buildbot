@@ -6,8 +6,12 @@
 #
 # Copyright 2012 Jason Edgecombe, unless otherwise noted.
 #
-define buildbot::master::instance( $user="buildmaster", $group="buildbot",
-                                   $config, $project_dir ) {
+define buildbot::master::instance(
+                $config,
+                $project_dir,
+                $user='buildmaster',
+                $group='buildbot',
+) {
   include buildbot::base
   include buildbot::master_slave_barrier
 
@@ -15,16 +19,16 @@ define buildbot::master::instance( $user="buildmaster", $group="buildbot",
   $config_files          = ['master_config']
 
   # commands to work with the buildbot master
-  $master_install_command = "buildbot create-master $project_dir"
-  $master_start_command   = "buildbot start --quiet $project_dir"
-  $master_restart_command = "buildbot restart --quiet $project_dir"
-  $master_status_command  = "/bin/kill -0 `/bin/cat $project_dir/twistd.pid`"
+  $master_install_command = "buildbot create-master ${project_dir}"
+  $master_start_command   = "buildbot start --quiet ${project_dir}"
+  $master_restart_command = "buildbot restart --quiet ${project_dir}"
+  $master_status_command  = "/bin/kill -0 `/bin/cat ${project_dir}/twistd.pid`"
 
   # resource defaults
   File {
     owner => $user,
     group => $group,
-    mode  => 0600,
+    mode  => '0600',
   }
 
   Exec {
@@ -33,25 +37,25 @@ define buildbot::master::instance( $user="buildmaster", $group="buildbot",
     user  => $user,
     group => $group,
   }
-                                  
-  buildbot::user_homedir { $user:
+
+  ensure_resource('buildbot::user_homedir', $user, {
     group    => $group,
-    fullname => "buildbot master",
+    fullname => 'buildbot',
     ingroups => [],
-  }
+  })
 
   file { $project_dir :
     ensure => directory,
-    mode   => 0700,
+    mode   => '0700',
   }
-  
+
   exec { $master_install_command :
-    creates => "$project_dir/buildbot.tac",
-    require => [ Class['buildbot::install::git'], File[$project_dir] ],
+    creates => "${project_dir}/buildbot.tac",
+    require => [ Class['buildbot::install'], File[$project_dir] ],
   }
 
   file { 'master_config':
-    path    => "$project_dir/master.cfg",
+    path    => "${project_dir}/master.cfg",
     source  => $config,
     require => File[$project_dir],
   }
@@ -71,7 +75,7 @@ define buildbot::master::instance( $user="buildmaster", $group="buildbot",
   }
 
   # start the buildmaster at boot-time via cron
-  cron {"buildmaster_$project_dir":
+  cron {"buildmaster_${project_dir}":
     user    => $user,
     command => $master_start_command,
     special => 'reboot',

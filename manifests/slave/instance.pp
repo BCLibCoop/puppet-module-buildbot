@@ -6,28 +6,30 @@
 #
 # Copyright 2012 Jason Edgecombe, unless otherwise noted.
 #
-define buildbot::slave::instance( $user="buildslave", $group="buildbot",
-                       $project_dir, $master_host_port,
-                       $slave_name, $slave_password,
-                       $info_source='', $info_template='',
-                       $admin_contact='Your Name Here <admin@youraddress.invalid>' ) {
+define buildbot::slave::instance(
+    $project_dir, $master_host_port,
+    $slave_name, $slave_password,
+    $user='buildslave', $group='buildbot',
+    $info_source='', $info_template='',
+    $admin_contact='Your Name Here <admin@youraddress.invalid>' ,
+) {
   include buildbot::base
   include buildbot::master_slave_barrier
 
   # configuration
-  $config_files          = ["$project_dir/info/admin","$project_dir/info/host"]
+  $config_files          = ["${project_dir}/info/admin","${project_dir}/info/host"]
 
   # commands to work with the buildslave
-  $slave_install_command = "buildslave create-slave $project_dir $master_host_port $slave_name $slave_password"
-  $slave_start_command   = "buildslave start --quiet $project_dir"
-  $slave_restart_command = "buildslave restart --quiet $project_dir"
-  $slave_status_command  = "/bin/kill -0 `/bin/cat $project_dir/twistd.pid`"
+  $slave_install_command = "buildslave create-slave ${project_dir} ${master_host_port} ${slave_name} ${slave_password}"
+  $slave_start_command   = "buildslave start --quiet ${project_dir}"
+  $slave_restart_command = "buildslave restart --quiet ${project_dir}"
+  $slave_status_command  = "/bin/kill -0 `/bin/cat ${project_dir}/twistd.pid`"
 
   # resource defaults
   File {
     owner => $user,
     group => $group,
-    mode  => 0600,
+    mode  => '0600',
   }
 
   Exec {
@@ -37,68 +39,64 @@ define buildbot::slave::instance( $user="buildslave", $group="buildbot",
     group => $group,
   }
 
-  # Fail gracefully if user tries to supply both source and template
-  if $info_template and $info_source {
+# Fail gracefully if user tries to supply both source and template
+  if(!empty($info_template) and !empty($info_source)){
     fail('You cannot supply both template and source to the buildbot::slave class')
   }
 
-  # If nothing is specified, default to our slave info template
-  if $info_template == '' and $info_source == '' {
+# If nothing is specified, default to our slave info template
+  if($info_template == '' and $info_source == ''){
     $slave_info_template = template('buildbot/host.erb')
   } elsif $info_source != '' {
     $slave_info_source = $info_source
   } elsif $info_template != '' {
     $slave_info_template = $info_template
-  } 
-
-  buildbot::user_homedir { $user:
-    group    => $group,
-    fullname => "buildbot slave",
-    ingroups => [],
   }
+
+  ensure_resource('buildbot::user_homedir', $user, {
+    group    => $group,
+    fullname => 'buildbot',
+    ingroups => [],
+  })
 
   file { $project_dir :
     ensure => directory,
-    mode  => 0700,
+    mode   => '0700',
   }
 
   exec { $slave_install_command:
-    path    => $path,
-    creates => "$project_dir/buildbot.tac",
-    require => [ Class['buildbot::install::git'], File[$project_dir] ],
+    creates => "${project_dir}/buildbot.tac",
+    require => [ Class['buildbot::install'], File[$project_dir] ],
   }
 
-  # put the slave info file into place
-  file { "$project_dir/info/host":
+# put the slave info file into place
+  file { "${project_dir}/info/host":
     content => $slave_info_template,
     source  => $slave_info_source,
     require => Exec[$slave_install_command],
   }
 
-  # put the slave admin file into place
-  file { "$project_dir/info/admin":
+# put the slave admin file into place
+  file { "${project_dir}/info/admin":
     content => $admin_contact,
-    require => [ Exec[$slave_install_command],
-                 Class['buildbot::master_slave_barrier'] ]
+    require => [ Exec[$slave_install_command], Class['buildbot::master_slave_barrier'] ]
   }
 
-  # start the build slave and restart if it isn't running
+# start the build slave and restart if it isn't running
   exec { $slave_start_command:
     unless    => $slave_status_command,
-    require     => [ File[$config_files],
-                     Exec[$slave_install_command],
-                     Class['buildbot::master_slave_barrier'] ],
+    require   => [ File[$config_files], Exec[$slave_install_command], Class['buildbot::master_slave_barrier'] ],
   }
 
-  # restart the build slave if files are changed
+# restart the build slave if files are changed
   exec { $slave_restart_command:
     refreshonly => true,
     require     => [ File[$config_files], Exec[$slave_install_command] ],
     subscribe   => File[$config_files],
   }
 
-  # start the buildslave at boot-time via cron
-  cron {"buildslave_$project_dir":
+# start the buildslave at boot-time via cron
+  cron {"buildslave_${project_dir}":
     user    => $user,
     command => $slave_start_command,
     special => 'reboot',

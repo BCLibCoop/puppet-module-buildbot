@@ -14,7 +14,7 @@ class buildbot::install::git( $directory='/usr/local/buildbot-src',
       $revision='master' ) {
   include buildbot::base
 
-  $install_command="python setup.py build && python setup.py install --install-layout=deb"
+  $install_command='python setup.py build && python setup.py install --install-layout=deb'
 
   vcsrepo { $directory:
     ensure   => present,
@@ -28,7 +28,7 @@ class buildbot::install::git( $directory='/usr/local/buildbot-src',
 
   exec { 'buildmaster_install':
     command => $install_command,
-    cwd     => "$directory/master",
+    cwd     => "${directory}/master",
     path    => ['/usr/local/bin', '/usr/bin','/bin'],
     creates => '/usr/bin/buildbot',
     require => Vcsrepo[$directory],
@@ -36,7 +36,7 @@ class buildbot::install::git( $directory='/usr/local/buildbot-src',
 
   exec { 'buildslave_install':
     command => $install_command,
-    cwd     => "$directory/slave",
+    cwd     => "${directory}/slave",
     path    => ['/usr/local/bin', '/usr/bin','/bin'],
     creates => '/usr/bin/buildslave',
     require => Vcsrepo[$directory],

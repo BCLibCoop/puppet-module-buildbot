@@ -9,7 +9,7 @@
 class buildbot::params {
 
   case $::operatingsystem {
-    Debian: {
+    'Debian': {
       $package_deps = [ 'build-essential', 'cvs', 'debhelper',
                         'dpkg', 'git-core', 'python-central',
                         'python-pip',
@@ -25,7 +25,7 @@ class buildbot::params {
         'SQLAlchemy' => { 'ensure' => '0.7.9' },
       }
     }
-    Ubuntu: {
+    'Ubuntu': {
       $package_deps = [ 'build-essential', 'cvs', 'debhelper',
                         'dpkg', 'git-core', 'python-central',
                         'python-pip',

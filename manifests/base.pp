@@ -11,13 +11,13 @@ class buildbot::base {
   include buildbot::install::deps
   include buildbot::params
 
-  $pip_defaults = { 'provider' => 'pip', 'require' => Class["buildbot::install::deps"] }
+  $pip_defaults = { 'provider' => 'pip', 'require' => Class['buildbot::install::deps'] }
   create_resources(package, $buildbot::params::pip_packages,
       $pip_defaults )
 
-  buildbot::user_homedir { "buildbot":
+  ensure_resource('buildbot::user_homedir', 'buildbot', {
     group    => "buildbot",
     fullname => "buildbot shared user",
     ingroups => [],
-  }
+  })
 }
