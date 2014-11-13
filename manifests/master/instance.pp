@@ -63,8 +63,7 @@ define buildbot::master::instance(
   # start the build master and restart if it isn't running
   exec { $master_start_command:
     unless    => $master_status_command,
-    require   => [ File[$config_files],
-                   Exec[$master_install_command] ],
+    require   => [ File[$config_files], Exec[$master_install_command] ],
   }
 
   # restart the build master if files are changed

@@ -12,8 +12,8 @@ class buildbot::base {
   include buildbot::install
 
   ensure_resource('buildbot::user_homedir', 'buildbot', {
-    group    => "buildbot",
-    fullname => "buildbot shared user",
+    group    => 'buildbot',
+    fullname => 'buildbot shared user',
     ingroups => [],
   })
 }
