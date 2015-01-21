@@ -7,7 +7,7 @@
 # Copyright 2012 Jason Edgecombe, unless otherwise noted.
 #
 class buildbot::base {
-  include apt
+  #include apt
   include buildbot::params
   include buildbot::install
 
